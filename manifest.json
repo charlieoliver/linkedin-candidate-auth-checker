@@ -1,0 +1,21 @@
+{
+  "manifest_version": 3,
+  "name": "LinkedIn Candidate Authenticity Checker",
+  "version": "0.1.0",
+  "description": "Analyzes LinkedIn profiles for fake candidate risk signals",
+  "permissions": ["storage","activeTab","scripting"],
+  "host_permissions": [
+    "https://www.linkedin.com/*",
+    "https://api.github.com/*"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": ["https://www.linkedin.com/in/*"],
+      "js": ["content-script.js"],
+      "run_at": "document_idle"
+    }
+  ]
+}
