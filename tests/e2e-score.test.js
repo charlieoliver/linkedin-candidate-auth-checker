@@ -1,19 +1,36 @@
 import { scoreProfile } from '../scoring-engine.js'
 
-function assert(cond,msg){ if(!cond) throw new Error(msg) }
+function assert(cond, msg) { if (!cond) throw new Error(msg) }
 
-const fakeProfile={
-  name:'Christopher Brown',
-  summary:'Software engineer building scalable platforms',
-  connections:120,
-  github:'https://github.com/chrisbrown',
-  email:'cbrown@proton.me'
+// Clean profile — should score 0
+const cleanProfile = {
+  name: 'Christopher Brown',
+  summary: 'Software engineer building scalable platforms with expertise in cloud infrastructure',
+  connections: 120,
+  github: 'https://github.com/chrisbrown',
+  email: 'cbrown@proton.me',
+  hasProfilePhoto: true,
+  joinedDate: 'January 2018'
 }
 
-const result=await scoreProfile(fakeProfile)
+const cleanResult = await scoreProfile(cleanProfile)
+assert(typeof cleanResult.score === 'number', 'score returned')
+assert(cleanResult.score >= 0 && cleanResult.score <= 100, 'score range valid')
+assert(Array.isArray(cleanResult.signals), 'signals array exists')
+assert(cleanResult.score === 0, `clean profile should score 0, got ${cleanResult.score}`)
 
-assert(typeof result.score==='number','score returned')
-assert(result.score>=0 && result.score<=100,'score range valid')
-assert(Array.isArray(result.signals),'signals array exists')
+// Suspicious profile — should score high
+const susProfile = {
+  name: 'Totally Real Person',
+  summary: 'Results-driven passionate developer',
+  connections: 8,
+  github: null,
+  email: 'devperson_coder@gmail.com',
+  hasProfilePhoto: false
+}
 
-console.log('e2e scoring test passed',result)
+const susResult = await scoreProfile(susProfile)
+assert(susResult.score >= 40, `suspicious profile should score high, got ${susResult.score}`)
+assert(susResult.signals.length >= 3, `should have multiple signals, got ${susResult.signals.length}`)
+
+console.log('e2e scoring test passed', { clean: cleanResult, suspicious: susResult })
