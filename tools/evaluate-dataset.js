@@ -1,0 +1,58 @@
+import fs from 'fs';
+import path from 'path';
+import { computeCredibility } from '../models/credibility-model.js';
+
+const DATA_DIR = path.join(process.cwd(), 'tests/fixtures/fakers');
+
+function fakeProfileFromFile(name) {
+  const lower = name.toLowerCase();
+
+  // crude synthetic profile generator for dataset scoring
+  return {
+    claimedExperience: 5,
+    experience: [
+      { start: 2019, end: 2021 },
+      { start: 2021, end: 2024 }
+    ],
+    github: lower.includes('samuel')
+      ? { accountAge: 0.2, commitYears: 0, repos: 1 }
+      : { accountAge: 3, commitYears: 2, repos: 8 },
+    linkedinConnections: lower.includes('samuel') ? 40 : 350,
+    linkedinAge: lower.includes('samuel') ? 0.5 : 4,
+    resumeText: lower.includes('walker')
+      ? 'Spearheaded transformative synergy initiatives that increased performance 200%'
+      : 'Built backend systems and handled scaling constraints'
+  };
+}
+
+function runEvaluation() {
+  const files = fs.readdirSync(DATA_DIR);
+
+  const results = [];
+
+  for (const file of files) {
+    if (!file.endsWith('.pdf') && !file.endsWith('.html')) continue;
+
+    const profile = fakeProfileFromFile(file);
+
+    const result = computeCredibility(profile);
+
+    results.push({
+      file,
+      score: result.credibilityScore,
+      risks: result.signals.risks.length
+    });
+  }
+
+  console.log('\nDataset Evaluation Results\n');
+
+  results.forEach(r => {
+    console.log(`${r.file} → score: ${r.score}, riskSignals: ${r.risks}`);
+  });
+
+  const avg = results.reduce((s, r) => s + r.score, 0) / results.length;
+
+  console.log(`\nAverage credibility score: ${avg.toFixed(2)}`);
+}
+
+runEvaluation();
