@@ -54,6 +54,29 @@ function runEvaluation() {
   const avg = results.reduce((s, r) => s + r.score, 0) / results.length;
 
   console.log(`\nAverage credibility score: ${avg.toFixed(2)}`);
+
+// compute simple classification metrics
+let tp=0, tn=0, fp=0, fn=0;
+
+results.forEach(r=>{
+  const label = LABELS[r.file];
+  if(!label) return;
+
+  const predictedFraud = r.score < 75;
+
+  if(label==='fraud' && predictedFraud) tp++;
+  if(label==='fraud' && !predictedFraud) fn++;
+  if(label==='legit' && !predictedFraud) tn++;
+  if(label==='legit' && predictedFraud) fp++;
+});
+
+const precision = tp/(tp+fp||1);
+const recall = tp/(tp+fn||1);
+
+console.log('\nEvaluation Metrics');
+console.log('TP:',tp,'FP:',fp,'TN:',tn,'FN:',fn);
+console.log('Precision:',precision.toFixed(2));
+console.log('Recall:',recall.toFixed(2));
 }
 
 runEvaluation();
