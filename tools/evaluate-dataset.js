@@ -3,6 +3,7 @@ import path from 'path';
 import { computeCredibility } from '../models/credibility-model.js';
 
 const DATA_DIR = path.join(process.cwd(), 'tests/fixtures/fakers');
+const LABELS = JSON.parse(fs.readFileSync(path.join(process.cwd(),'dataset/labels.json')));
 
 function fakeProfileFromFile(name) {
   const lower = name.toLowerCase();
