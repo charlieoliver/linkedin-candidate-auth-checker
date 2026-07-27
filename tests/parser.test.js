@@ -19,19 +19,28 @@ function test(name, fn) {
 
 console.log('parser tests')
 
-// Modern selectors with photo
+// Modern selectors with photo, contact info, and experience
 const modernHtml = `
 <html><body>
 <h1>Christopher Brown</h1>
 <div data-view-name="profile-top-card-member-photo">
   <img src="https://media.licdn.com/photo.jpg" alt="Christopher Brown">
 </div>
+<div class="text-body-medium">Senior Backend Engineer</div>
+<span class="text-body-small inline t-black--light break-words">Raleigh, NC</span>
 <div data-view-name="profile-card-about">
   <div data-testid="expandable-text-box">Software engineer building distributed systems</div>
 </div>
 <span>120 connections</span>
 <a href="https://github.com/chrisbrown">GitHub</a>
 <a href="https://www.linkedin.com/in/chrisbrown/overlay/contact-info/">Contact</a>
+<section>
+  <li>
+    <span aria-hidden="true">Backend Engineer</span>
+    <span class="t-14 t-normal">ExampleCo</span>
+    <span>2 yr</span>
+  </li>
+</section>
 </body></html>
 `
 
@@ -39,6 +48,13 @@ test('parses name from h1', () => {
   const doc = new JSDOM(modernHtml).window.document
   const profile = parseLinkedInProfile(doc)
   assert(profile.name === "Christopher Brown", `got: ${profile.name}`)
+})
+
+test('parses headline and location', () => {
+  const doc = new JSDOM(modernHtml).window.document
+  const profile = parseLinkedInProfile(doc)
+  assert(profile.headline === "Senior Backend Engineer", `headline: ${profile.headline}`)
+  assert(profile.location === "Raleigh, NC", `location: ${profile.location}`)
 })
 
 test('parses summary from modern selector', () => {
@@ -69,6 +85,16 @@ test('parses contact info URL', () => {
   const doc = new JSDOM(modernHtml).window.document
   const profile = parseLinkedInProfile(doc)
   assert(profile.contactInfoUrl && profile.contactInfoUrl.includes('/overlay/contact-info/'), `got: ${profile.contactInfoUrl}`)
+})
+
+test('parses experience roles', () => {
+  const doc = new JSDOM(modernHtml).window.document
+  const profile = parseLinkedInProfile(doc)
+  assert(Array.isArray(profile.experience), 'experience array parsed')
+  assert(profile.experience.length === 1, `roles: ${profile.experience.length}`)
+  assert(profile.experience[0].title === "Backend Engineer", `title: ${profile.experience[0].title}`)
+  assert(profile.experience[0].company === "ExampleCo", `company: ${profile.experience[0].company}`)
+  assert(profile.experience[0].duration === "2 yr", `duration: ${profile.experience[0].duration}`)
 })
 
 // No photo (SVG avatar)
